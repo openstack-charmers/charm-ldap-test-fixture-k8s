@@ -1,0 +1,20 @@
+name: ldap-test-fixture
+summary: Openstack ldap-test-fixture
+license: Apache-2.0
+description: |
+  Ubuntu distribution of OpenStack ldap-test-fixture
+version: 2023.1
+
+base: ubuntu:22.04
+platforms:
+  amd64:
+
+parts:
+  phpldapadmin:
+    plugin: nil
+    overlay-packages:
+      - apache2
+      - slapd
+      - ldap-utils
+      - phpldapadmin
+

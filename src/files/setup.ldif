@@ -1,0 +1,59 @@
+# Entry 3: ou=groups,dc=test,dc=com
+dn: ou=groups,dc=test,dc=com
+objectclass: organizationalUnit
+objectclass: top
+ou: groups
+
+# Entry 4: cn=admin,ou=groups,dc=test,dc=com
+dn: cn=admin,ou=groups,dc=test,dc=com
+cn: admin
+gidnumber: 500
+memberuid: johndoe
+objectclass: posixGroup
+objectclass: top
+
+# Entry 5: cn=openstack,ou=groups,dc=test,dc=com
+dn: cn=openstack,ou=groups,dc=test,dc=com
+cn: openstack
+gidnumber: 501
+memberuid: johndoe
+objectclass: posixGroup
+objectclass: top
+
+# Entry 6: ou=users,dc=test,dc=com
+dn: ou=users,dc=test,dc=com
+objectclass: organizationalUnit
+objectclass: top
+ou: users
+
+# Entry 7: cn=janedoe,ou=users,dc=test,dc=com
+dn: cn=janedoe,ou=users,dc=test,dc=com
+cn: janedoe
+gidnumber: 500
+givenname: Jane
+homedirectory: /home/users/janedoe
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: Jane Doe
+uid: janedoe
+uidnumber: 1001
+userpassword: {MD5}HOMR4pM15t3gYd8WUxMG8g==
+# password is crapper
+
+# Entry 8: cn=johndoe,ou=users,dc=test,dc=com
+dn: cn=johndoe,ou=users,dc=test,dc=com
+cn: johndoe
+gidnumber: 501
+givenname: John
+homedirectory: /home/users/jdoe
+loginshell: /bin/sh
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: John Doe
+uid: johndoe
+uidnumber: 1000
+userpassword: {MD5}HOMR4pM15t3gYd8WUxMG8g==
+# password is crapper
+
