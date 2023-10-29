@@ -27,6 +27,7 @@ develop a new k8s charm using the Operator Framework:
 import logging
 import socket
 
+import jinja2
 from ops.charm import ActionEvent, CharmBase
 from ops.main import main
 from ops.model import ActiveStatus
@@ -57,11 +58,12 @@ class CharmLdapTestFixtureK8SCharm(CharmBase):
 
     def configure_slap_pkg(self, container):
         """Configure  slapd in container."""
+        domain = self.config["domain"]
         slap_settings = [
             "slapd slapd/internal/adminpw password crapper",
             "slapd slapd/password1 password crapper",
             "slapd slapd/password2 password crapper",
-            "slapd slapd/domain string test.com",
+            f"slapd slapd/domain string {domain}",
             "slapd shared/organization string test",
         ]
         process = container.exec(["debconf-set-selections"])
@@ -73,11 +75,42 @@ class CharmLdapTestFixtureK8SCharm(CharmBase):
         process = container.exec(["dpkg-reconfigure", "-f", "noninteractive", "slapd"])
         process.wait_output()
 
+    @property
+    def dc(self):
+        """Return dc for config."""
+        return ",".join([f"dc={d}" for d in self.config["domain"].split(".")])
+
     def setup_slap_users(self, container):
         """Add test users to slapd in container."""
-        with open("src/files/setup.ldif", "r") as f:
-            contents = f.read()
-        container.push("/tmp/setup.ldif", contents)
+        gid_counter = 500
+        uid_counter = 1000
+        context = {"dc": self.dc}
+        groups = []
+        users = []
+        for group in ["admin", "openstack"]:
+            groups.append({"gidnumber": gid_counter, "cn": group})
+            gid_counter += 1
+
+        user_gid = groups[0]["gidnumber"]
+        for user in self.config["users"].split(","):
+            name = user.replace(" ", "").lower()
+            users.append(
+                {
+                    "uidnumber": uid_counter,
+                    "uid": name,
+                    "sn": user,
+                    "first": user.split()[0],
+                    "gidnumber": user_gid,
+                }
+            )
+            uid_counter += 1
+
+        context["groups"] = groups
+        context["users"] = users
+        loader = jinja2.FileSystemLoader("src/templates")
+        _tmpl_env = jinja2.Environment(loader=loader)
+        template = _tmpl_env.get_template("setup.ldif.j2")
+        container.push("/tmp/setup.ldif", template.render(context))
         process = container.exec(["slapadd", "-v", "-c", "-l", "/tmp/setup.ldif"])
         process.wait()
 
@@ -86,7 +119,7 @@ class CharmLdapTestFixtureK8SCharm(CharmBase):
         current_contents = container.pull("/etc/phpldapadmin/config.php")
         new_contents = ""
         for line in current_contents:
-            new_contents += line.replace("dc=example", "dc=test")
+            new_contents += line.replace("dc=example,dc=com", self.dc)
         container.push("/etc/phpldapadmin/config.php", new_contents)
 
     def setup(self):

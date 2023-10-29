@@ -1,0 +1,35 @@
+dn: ou=groups,{{ dc }}
+objectclass: organizationalUnit
+objectclass: top
+ou: groups
+
+{% for group in groups %}
+dn: cn={{ group.cn }},ou=groups,{{ dc }}
+cn: {{ group.cn }}
+gidnumber: {{ group.gidnumber }}
+{% for user in users -%}
+memberuid: {{ user.uid }}
+{% endfor -%}
+objectclass: posixGroup
+objectclass: top
+{% endfor %}
+
+dn: ou=users,{{ dc }}
+objectclass: organizationalUnit
+objectclass: top
+ou: users
+
+{% for user in users %}
+dn: cn={{ user.uid }},ou=users,{{ dc }}
+cn: {{ user.uid }}
+gidnumber: {{ user.gidnumber }}
+givenname: {{ user.first }}
+homedirectory: /home/users/{{ user.uid }}
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: {{ user.sn }}
+uid: {{ user.uid }}
+uidnumber: {{ user.uidnumber }}
+userpassword: {MD5}HOMR4pM15t3gYd8WUxMG8g==
+{% endfor %}

@@ -3,7 +3,9 @@
 #
 # See https://juju.is/docs/config for guidance.
 options:
-  debug:
-    default: False
-    type: boolean
-
+  domain:
+    default: "test.com"
+    type: string
+  users:
+    default: "John Doe,Jane Doe"
+    type: string
